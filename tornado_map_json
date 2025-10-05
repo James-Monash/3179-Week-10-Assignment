@@ -1,0 +1,50 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "width": 900,
+  "height": 700,
+  "projection": { "type": "mercator", "center": [134, -28], "scale": 850 },
+  "params": [
+    { "name": "year_start", "value": 1900, "bind": { "input": "range", "min": 1900, "max": 2024, "step": 1 } },
+    { "name": "year_end",   "value": 2024, "bind": { "input": "range", "min": 1900, "max": 2024, "step": 1 } }
+  ],
+  "data": {
+    "url": "gexagon_grid_australia.geojson",
+    "format": { "type": "geojson" }
+  },
+  "transform": [
+    {
+      "lookup": "properties.id",
+      "from": {
+        "data": {
+          "url": "cleaned_tornado_with_hex.csv",
+          "format": { "type": "csv" },
+          "transform": [
+            {
+              "filter": "datum.hex_id != null && (toNumber(datum.Year) >= year_start) && (toNumber(datum.Year) <= year_end)"
+            },
+            {
+              "aggregate": [{ "op": "count", "as": "tornado_count" }],
+              "groupby": ["hex_id"]
+            }
+          ]
+        },
+        "key": "hex_id",
+        "fields": ["tornado_count"]
+      }
+    },
+    { "calculate": "datum.tornado_count == null ? 0 : datum.tornado_count", "as": "tornado_count_filled" }
+  ],
+  "mark": { "type": "geoshape", "stroke": "white", "strokeWidth": 0.4 },
+  "encoding": {
+    "color": {
+      "field": "tornado_count_filled",
+      "type": "quantitative",
+      "scale": { "scheme": "reds" },
+      "legend": { "title": "Tornado count", "orient": "right" }
+    },
+    "tooltip": [
+      { "field": "properties.id", "type": "nominal", "title": "Hex ID" },
+      { "field": "tornado_count_filled", "type": "quantitative", "title": "Tornadoes" }
+    ]
+  }
+}
