@@ -1,50 +1,105 @@
 {
-  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "width": 900,
-  "height": 700,
-  "projection": { "type": "mercator", "center": [134, -28], "scale": 850 },
-  "params": [
-    { "name": "year_start", "value": 1900, "bind": { "input": "range", "min": 1900, "max": 2024, "step": 1 } },
-    { "name": "year_end",   "value": 2024, "bind": { "input": "range", "min": 1900, "max": 2024, "step": 1 } }
-  ],
-  "data": {
-    "url": "gexagon_grid_australia.geojson",
-    "format": { "type": "geojson" }
+  "height": 600,
+  "projection": {"type": "mercator", "center": [134, -28], "scale": 850},
+  "background": "#c6dbef",
+  "title": {
+    "text": "Top 5 Fastest Tornadoes by Wind Speed (Year range editable)",
+    "anchor": "start",
+    "fontSize": 18,
+    "font": "Helvetica",
+    "color": "#333"
   },
-  "transform": [
+  "data": {
+    "url": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/tornado_with_wind_speed_data.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "Date/Time": "date:%d/%m/%Y %H:%M"
+      }
+    }
+  },
+  "params": [
     {
-      "lookup": "properties.id",
-      "from": {
-        "data": {
-          "url": "tornado_by_hex_year.csv",
-          "format": { "type": "csv" },
-          "transform": [
-            {
-              "filter": "datum.hex_id != null && (toNumber(datum.Year) >= year_start) && (toNumber(datum.Year) <= year_end)"
-            },
-            {
-              "aggregate": [{ "op": "sum", "field": "tornado_count", "as": "tornado_count" }],
-              "groupby": ["hex_id"]
-            }
-          ]
-        },
-        "key": "hex_id",
-        "fields": ["tornado_count"]
+      "name": "Min_Year",
+      "value": 1900,
+      "bind": {
+        "input": "range",
+        "min": 1900,
+        "max": 2025,
+        "step": 1,
+        "name": "Start Year: "
       }
     },
-    { "calculate": "datum.tornado_count == null ? 0 : datum.tornado_count", "as": "tornado_count_filled" }
+    {
+      "name": "Max_Year",
+      "value": 2025,
+      "bind": {
+        "input": "range",
+        "min": 1900,
+        "max": 2025,
+        "step": 1,
+        "name": "End Year: "
+      }
+    }
   ],
-  "mark": { "type": "geoshape", "stroke": "white", "strokeWidth": 0.4 },
-  "encoding": {
-    "color": {
-      "field": "tornado_count_filled",
-      "type": "quantitative",
-      "scale": { "scheme": "reds" },
-      "legend": { "title": "Tornado count", "orient": "right" }
+  "transform": [
+    {"calculate": "toNumber(datum['Max speed (km/h)'])", "as": "MaxSpeed"},
+    {"calculate": "isValid(datum['Date/Time']) ? datum['Date/Time'] : null", "as": "ParsedDate"},
+    {"filter": "datum.ParsedDate !== null"},
+    {"calculate": "year(datum.ParsedDate)", "as": "Year"},
+    {"calculate": "toNumber(datum.Longitude)", "as": "lon"},
+    {"calculate": "toNumber(datum.Latitude)", "as": "lat"},
+    {
+      "filter": "isFinite(datum.MaxSpeed) && isFinite(datum.lon) && isFinite(datum.lat) && (datum.Year >= Min_Year) && (datum.Year <= Max_Year)"
     },
-    "tooltip": [
-      { "field": "properties.id", "type": "nominal", "title": "Hex ID" },
-      { "field": "tornado_count_filled", "type": "quantitative", "title": "Tornadoes" }
-    ]
+    {
+      "window": [
+        {"op": "row_number", "as": "rownum"}
+      ],
+      "sort": [
+        {"field": "MaxSpeed", "order": "descending"},
+        {"field": "ParsedDate", "order": "ascending"},
+        {"field": "Tornado ID", "order": "ascending"}
+      ]
+    },
+    {"filter": "datum.rownum <= 5"}
+  ],
+  "layer": [
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/ne_50m_admin_1_states_provinces.json",
+        "format": {"type": "topojson", "feature": "ne_50m_admin_1_states_provinces"}
+      },
+      "mark": {"type": "geoshape", "fill": "#f7f3ea", "stroke": "#999", "strokeWidth": 0.8}
+    },
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/ne_50m_graticules_10.json",
+        "format": {"type": "topojson", "feature": "ne_50m_graticules_10"}
+      },
+      "mark": {"type": "geoshape", "stroke": "#ccc", "strokeWidth": 0.7}
+    },
+    {
+      "mark": {"type": "image", "width": 36, "height": 36, "opacity": 1},
+      "encoding": {
+        "longitude": {"field": "lon", "type": "quantitative"},
+        "latitude": {"field": "lat", "type": "quantitative"},
+        "url": {
+          "value": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/tornado.svg"
+        },
+        "tooltip": [
+          {"field": "Date/Time", "type": "temporal", "title": "Date/Time"},
+          {"field": "MaxSpeed", "type": "quantitative", "title": "Max wind speed"},
+          {"field": "Tornado ID", "type": "nominal", "title": "Tornado ID"},
+          {"field": "Year", "type": "ordinal", "title": "Year"}
+        ]
+      }
+    }
+  ],
+  "config": {
+    "legend": {"labelFont": "Helvetica", "titleFont": "Helvetica"},
+    "title": {"font": "Helvetica"}
   }
 }
