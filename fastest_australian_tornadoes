@@ -1,5 +1,5 @@
 {
-  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
   "width": 900,
   "height": 600,
   "projection": {"type": "mercator", "center": [134, -28], "scale": 850},
