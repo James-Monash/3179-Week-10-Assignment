@@ -16,14 +16,14 @@
       "lookup": "properties.id",
       "from": {
         "data": {
-          "url": "cleaned_tornado_with_hex.csv",
+          "url": "tornado_by_hex_year.csv",
           "format": { "type": "csv" },
           "transform": [
             {
               "filter": "datum.hex_id != null && (toNumber(datum.Year) >= year_start) && (toNumber(datum.Year) <= year_end)"
             },
             {
-              "aggregate": [{ "op": "count", "as": "tornado_count" }],
+              "aggregate": [{ "op": "sum", "field": "tornado_count", "as": "tornado_count" }],
               "groupby": ["hex_id"]
             }
           ]
