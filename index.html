@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fujita Tornado Visualisations</title>
+
+  <!-- Vega & Vega-Lite & vega-embed -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      margin: 16px;
+      background: #fff;
+      color: #222;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 12px 0 18px 0;
+      font-size: 26px;
+    }
+
+    /* Container for top spec */
+    #top-chart {
+      max-width: 1000px;
+      margin: 0 auto 18px auto;
+    }
+
+    /* Two column layout */
+    .two-column {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .chart-card {
+      width: 48%;
+      min-width: 320px;
+      box-sizing: border-box;
+      padding: 8px;
+      background: #f8f8f8;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    /* Legend + checkboxes */
+    #controls {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 14px;
+      color: #222;
+    }
+
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      border: 1px solid #999;
+      display: inline-block;
+    }
+
+    .checkboxes {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .checkboxes label {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    footer {
+      margin-top: 18px;
+      text-align: center;
+      color: #666;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Fujita Tornadoes — Australia & United States (2010–2024)</h1>
+
+  <!-- Top chart: existing spec file -->
+  <div id="top-chart"></div>
+
+  <!-- Two-column maps -->
+  <div class="two-column">
+    <div id="aus-chart" class="chart-card"></div>
+    <div id="us-chart" class="chart-card"></div>
+  </div>
+
+  <!-- Legend and checkboxes (shared) -->
+  <div id="controls">
+    <div class="legend" id="legend">
+      <!-- legend items injected by script -->
+    </div>
+
+    <div class="checkboxes" id="checkboxes">
+      <!-- checkboxes injected by script -->
+    </div>
+  </div>
+
+  <footer>Toggle ratings to show/hide them on both maps</footer>
+
+  <script>
+    // CONFIG: file locations and column names
+    const topSpecUrl = "fasted_australian_tornadoes.json"; // existing spec file to embed at top
+
+    // Layer CSV patterns for per-rating layers (these must be reachable)
+    const ausCsvPattern = "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/Tornado_F{R}_2010_2024_Australia.csv";
+    const usCsvPattern  = "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/Tornado_F{R}_2010_2024_America.csv";
+
+    // TopoJSON basemaps and graticules for the two constructed charts
+    const ausBaseTopo = "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/mainland_australia.json";
+    const ausGraticules = "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/10_degree_graticules_for_australia.json";
+
+    const usBaseTopo = "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/mainland_united_states.json";
+    const usGraticules = "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/10_degree_graticules_for_united_states.json";
+
+    // Colors (consistent palette)
+    const ratingColors = {
+      "F0": "#999999",
+      "F1": "#E69F00",
+      "F2": "#56B4E9",
+      "F3": "#009E73",
+      "F4": "#F0E442",
+      "F5": "#984ea3"
+    };
+
+    const ratings = ["F0","F1","F2","F3","F4","F5"];
+
+    // CSV coordinate field names (Australia dataset uses "Latitude" and "Longitude")
+    const ausLatField = "Latitude";
+    const ausLonField = "Longitude";
+    // U.S. dataset field names assumed to be BEGIN_LAT / BEGIN_LON (adjust if needed)
+    const usLatField = "BEGIN_LAT";
+    const usLonField = "BEGIN_LON";
+
+    // Keep current checkbox state
+    let selectedRatings = new Set(ratings);
+
+    // Render legend and checkboxes
+    function buildLegendAndCheckboxes() {
+      const legendDiv = document.getElementById("legend");
+      const cbDiv = document.getElementById("checkboxes");
+      legendDiv.innerHTML = "";
+      cbDiv.innerHTML = "";
+
+      ratings.forEach(r => {
+        // legend swatch
+        const item = document.createElement("div");
+        item.className = "legend-item";
+        const sw = document.createElement("span");
+        sw.className = "swatch";
+        sw.style.background = ratingColors[r];
+        item.appendChild(sw);
+        const label = document.createElement("span");
+        label.textContent = r;
+        item.appendChild(label);
+        legendDiv.appendChild(item);
+
+        // checkbox
+        const labelEl = document.createElement("label");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.value = r;
+        cb.checked = true;
+        cb.addEventListener("change", onCheckboxChange);
+        labelEl.appendChild(cb);
+        const span = document.createElement("span");
+        span.textContent = r;
+        labelEl.appendChild(span);
+        cbDiv.appendChild(labelEl);
+      });
+    }
+
+    // Load and embed the top spec file as-is
+    async function embedTopSpec() {
+      try {
+        const resp = await fetch(topSpecUrl);
+        if (!resp.ok) throw new Error("Failed to fetch top spec: " + resp.status);
+        const spec = await resp.json();
+        // embed into #top-chart
+        vegaEmbed("#top-chart", spec, {actions:false, renderer: "canvas"});
+      } catch (err) {
+        document.getElementById("top-chart").innerText = "Unable to load top spec: " + err.message;
+        console.error(err);
+      }
+    }
+
+    // Fetch CSV from URL and return array of objects (uses d3.csv-style parsing via fetch+text)
+    async function fetchCsv(url) {
+      const r = await fetch(url);
+      if (!r.ok) {
+        console.warn("CSV not found at", url, "status", r.status);
+        return [];
+      }
+      const text = await r.text();
+      // simple CSV parse: split lines and commas (adequate for well-formed CSV without embedded commas/newlines)
+      // Use a robust parser if your CSVs include quoting or commas in fields.
+      const lines = text.trim().split(/\r?\n/);
+      if (lines.length === 0) return [];
+      const cols = lines[0].split(",");
+      const rows = [];
+      for (let i=1;i<lines.length;i++){
+        const vals = lines[i].split(",");
+        if (vals.length === 0) continue;
+        const obj = {};
+        for (let j=0;j<cols.length;j++){
+          obj[cols[j]] = vals[j] !== undefined ? vals[j] : "";
+        }
+        rows.push(obj);
+      }
+      return rows;
+    }
+
+    // Build a layered Vega-Lite spec for a country using per-rating CSV URLs and lat/lon fields
+    async function buildLayeredSpec(baseTopoUrl, graticulesUrl, csvPattern, latField, lonField, titleText) {
+      // For each rating, fetch CSV and keep parsed rows
+      const layers = [];
+
+      // Base land layer
+      layers.push({
+        data: { url: baseTopoUrl, format: { type: "topojson", feature: "ne_50m_admin_1_states_provinces" } },
+        mark: { type: "geoshape", fill: "#e0e0e0", stroke: "white", strokeWidth: 1 }
+      });
+
+      // graticules
+      layers.push({
+        data: { url: graticulesUrl, format: { type: "topojson", feature: "ne_50m_graticules_10" } },
+        mark: { type: "geoshape", stroke: "#ccc", strokeWidth: 0.9 }
+      });
+
+      // For each rating in ascending order (F0 first, F5 last)
+      for (const r of ratings) {
+        const url = csvPattern.replace("{R}", r.slice(1)); // pattern expects number in place of {R}
+        const rows = await fetchCsv(url);
+        // If the CSV has numeric lat/lon, ensure they are numbers
+        const normalized = rows.map(row => {
+          const out = Object.assign({}, row);
+          if (out[latField] !== undefined) out[latField] = parseFloat(out[latField]);
+          if (out[lonField] !== undefined) out[lonField] = parseFloat(out[lonField]);
+          // ensure TOR_F_SCALE exists so tooltip or other encodings can use it
+          out.TOR_F_SCALE = out.TOR_F_SCALE || r;
+          return out;
+        });
+
+        layers.push({
+          data: { values: normalized },
+          mark: { type: "point", filled: true, size: 30, tooltip: true },
+          encoding: {
+            longitude: { field: lonField, type: "quantitative" },
+            latitude: { field: latField, type: "quantitative" },
+            color: { value: ratingColors[r] }
+          }
+        });
+      }
+
+      // return full spec
+      return {
+        $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+        width: 800,
+        height: 600,
+        background: "#c6dbef",
+        projection: { type: "mercator", center: titleText.includes("Australia") ? [134, -25] : [-98, 38], scale: 700 },
+        title: { text: titleText, anchor: "start", fontSize: 20, font: "Helvetica", color: "#333", subtitle: "Color-coded by Fujita rating" },
+        layer: layers,
+        config: {
+          legend: { labelFontSize: 12, titleFontSize: 14 },
+          view: { stroke: "transparent" }
+        }
+      };
+    }
+
+    // Store current embeds to allow re-embedding later
+    let ausEmbed = null;
+    let usEmbed = null;
+
+    // Render both maps using current selectedRatings set
+    async function renderMaps() {
+      // Build spec for Australia with only selected ratings included
+      const ausLayers = [];
+
+      // base topomap and graticules (same as in buildLayeredSpec concept)
+      ausLayers.push({
+        data: { url: ausBaseTopo, format: { type: "topojson", feature: "ne_50m_admin_1_states_provinces" } },
+        mark: { type: "geoshape", fill: "#e0e0e0", stroke: "white", strokeWidth: 1 }
+      });
+      ausLayers.push({
+        data: { url: ausGraticules, format: { type: "topojson", feature: "ne_50m_graticules_10" } },
+        mark: { type: "geoshape", stroke: "#ccc", strokeWidth: 0.9 }
+      });
+
+      // US base and graticules for US spec layers
+      const usLayers = [];
+      usLayers.push({
+        data: { url: usBaseTopo, format: { type: "topojson", feature: "ne_50m_admin_1_states_provinces" } },
+        mark: { type: "geoshape", fill: "#e0e0e0", stroke: "white", strokeWidth: 1 }
+      });
+      usLayers.push({
+        data: { url: usGraticules, format: { type: "topojson", feature: "ne_50m_graticules_10" } },
+        mark: { type: "geoshape", stroke: "#ccc", strokeWidth: 0.9 }
+      });
+
+      // For each rating, if selected, fetch CSV and append layer
+      for (const r of ratings) {
+        if (!selectedRatings.has(r)) continue;
+        // Australia CSV URL expects number; our pattern has {R} replaced by the number
+        const ausUrl = ausCsvPattern.replace("{R}", r.slice(1));
+        const usUrl  = usCsvPattern.replace("{R}", r.slice(1));
+
+        // fetch CSV rows (concurrently)
+        const [ausRows, usRows] = await Promise.all([fetchCsv(ausUrl), fetchCsv(usUrl)]);
+
+        const ausValues = ausRows.map(row => {
+          const out = Object.assign({}, row);
+          if (out[ausLatField] !== undefined) out[ausLatField] = parseFloat(out[ausLatField]);
+          if (out[ausLonField] !== undefined) out[ausLonField] = parseFloat(out[ausLonField]);
+          out.TOR_F_SCALE = out.TOR_F_SCALE || r;
+          return out;
+        });
+
+        const usValues = usRows.map(row => {
+          const out = Object.assign({}, row);
+          if (out[usLatField] !== undefined) out[usLatField] = parseFloat(out[usLatField]);
+          if (out[usLonField] !== undefined) out[usLonField] = parseFloat(out[usLonField]);
+          out.TOR_F_SCALE = out.TOR_F_SCALE || r;
+          return out;
+        });
+
+        // Append the data layer for the rating (aus then us)
+        ausLayers.push({
+          data: { values: ausValues },
+          mark: { type: "point", filled: true, size: 30, tooltip: true },
+          encoding: {
+            longitude: { field: ausLonField, type: "quantitative" },
+            latitude: { field: ausLatField, type: "quantitative" },
+            color: { value: ratingColors[r] }
+          }
+        });
+
+        usLayers.push({
+          data: { values: usValues },
+          mark: { type: "point", filled: true, size: 30, tooltip: true },
+          encoding: {
+            longitude: { field: usLonField, type: "quantitative" },
+            latitude: { field: usLatField, type: "quantitative" },
+            color: { value: ratingColors[r] }
+          }
+        });
+      }
+
+      // Build full specs
+      const ausSpec = {
+        $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+        width: 800,
+        height: 600,
+        background: "#c6dbef",
+        projection: { type: "mercator", center: [134, -25], scale: 700 },
+        title: { text: "Australian Tornadoes (2010–2024)", anchor: "start", fontSize: 20, font: "Helvetica", color: "#333", subtitle: "Color-coded by Fujita rating" },
+        layer: ausLayers,
+        config: { legend: { labelFontSize: 12, titleFontSize: 14 }, view: { stroke: "transparent"} }
+      };
+
+      const usSpec = {
+        $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+        width: 800,
+        height: 600,
+        background: "#c6dbef",
+        projection: { type: "mercator", center: [-98, 38], scale: 700 },
+        title: { text: "U.S. Tornadoes (2010–2024)", anchor: "start", fontSize: 20, font: "Helvetica", color: "#333", subtitle: "Color-coded by Fujita rating" },
+        layer: usLayers,
+        config: { legend: { labelFontSize: 12, titleFontSize: 14 }, view: { stroke: "transparent"} }
+      };
+
+      // embed (or re-embed) into placeholders
+      // use small options to remove action icons for cleanliness
+      const embedOpts = { actions: false, renderer: "canvas" };
+
+      // embed australia
+      try {
+        if (ausEmbed && ausEmbed.view) {
+          // simply re-embed to replace spec (vegaEmbed doesn't provide a straightforward update API for Vega-Lite specs)
+          document.getElementById("aus-chart").innerHTML = "";
+        }
+        ausEmbed = await vegaEmbed("#aus-chart", ausSpec, embedOpts);
+      } catch (err) {
+        console.error("Error embedding Australia chart:", err);
+        document.getElementById("aus-chart").innerText = "Error rendering Australia chart: " + err.message;
+      }
+
+      // embed US
+      try {
+        if (usEmbed && usEmbed.view) {
+          document.getElementById("us-chart").innerHTML = "";
+        }
+        usEmbed = await vegaEmbed("#us-chart", usSpec, embedOpts);
+      } catch (err) {
+        console.error("Error embedding US chart:", err);
+        document.getElementById("us-chart").innerText = "Error rendering US chart: " + err.message;
+      }
+    }
+
+    // Checkbox handler
+    function onCheckboxChange(e) {
+      const rating = e.target.value;
+      if (e.target.checked) selectedRatings.add(rating);
+      else selectedRatings.delete(rating);
+      // re-render maps reflecting current selection
+      renderMaps();
+    }
+
+    // Initialize everything
+    async function init() {
+      buildLegendAndCheckboxes();
+      await embedTopSpec();
+      await renderMaps();
+    }
+
+    // Start
+    init();
+  </script>
+</body>
+</html>
