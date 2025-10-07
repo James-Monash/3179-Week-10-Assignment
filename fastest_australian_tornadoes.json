@@ -96,6 +96,75 @@
           {"field": "Year", "type": "ordinal", "title": "Year"}
         ]
       }
+    },
+
+    {
+      "description": "Legend backdrop point (invisible) to anchor legend group location",
+      "data": {"values": [{"lon": 153, "lat": -16}]},
+      "mark": {"type": "point", "opacity": 0},
+      "encoding": {
+        "longitude": {"field": "lon", "type": "quantitative"},
+        "latitude": {"field": "lat", "type": "quantitative"}
+      }
+    },
+
+    {
+      "description": "Legend items (text coloured by rating) positioned relative to anchor point",
+      "data": {
+        "values": [
+          {"lon":153,"lat":-16,"label":"F0","color":"#999999","dy":-20,"dx":-60},
+          {"lon":153,"lat":-16,"label":"F1","color":"#E69F00","dy":-8,"dx":-60},
+          {"lon":153,"lat":-16,"label":"F2","color":"#56B4E9","dy":4,"dx":-60},
+          {"lon":153,"lat":-16,"label":"F3","color":"#009E73","dy":16,"dx":-60},
+          {"lon":153,"lat":-16,"label":"F4","color":"#F0E442","dy":28,"dx":-60},
+          {"lon":153,"lat":-16,"label":"F5","color":"#984ea3","dy":40,"dx":-60}
+        ]
+      },
+      "mark": {"type": "text", "fontSize": 12, "font": "Helvetica", "align": "left"},
+      "encoding": {
+        "longitude": {"field": "lon", "type": "quantitative"},
+        "latitude": {"field": "lat", "type": "quantitative"},
+        "text": {"field": "label", "type": "nominal"},
+        "color": {"field": "color", "type": "nominal", "legend": null}
+      },
+      "transform": [
+        {
+          "calculate": "datum.dx",
+          "as": "offx"
+        },
+        {
+          "calculate": "datum.dy",
+          "as": "offy"
+        }
+      ]
+    },
+
+    {
+      "description": "Dynamic Start Year label (positioned above the Start slider)",
+      "data": {"values":[{"lon":134,"lat":-9}]},
+      "transform": [
+        {"calculate": "Min_Year", "as": "minYear"}
+      ],
+      "mark": {"type": "text", "fontSize": 13, "font": "Helvetica", "align":"center", "dx":0, "dy":0, "color":"#222"},
+      "encoding": {
+        "longitude": {"field":"lon","type":"quantitative"},
+        "latitude": {"field":"lat","type":"quantitative"},
+        "text": {"expr":"'Start Year: ' + Min_Year"}
+      }
+    },
+
+    {
+      "description": "Dynamic End Year label (positioned above the End slider)",
+      "data": {"values":[{"lon":134,"lat":-6}]},
+      "transform": [
+        {"calculate": "Max_Year", "as": "maxYear"}
+      ],
+      "mark": {"type": "text", "fontSize": 13, "font": "Helvetica", "align":"center", "dx":0, "dy":0, "color":"#222"},
+      "encoding": {
+        "longitude": {"field":"lon","type":"quantitative"},
+        "latitude": {"field":"lat","type":"quantitative"},
+        "text": {"expr":"'End Year: ' + Max_Year"}
+      }
     }
   ],
   "config": {
