@@ -48,74 +48,25 @@
     },
     {
       "data": {
-        "url": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/Tornado_F0_2010_2024_America.csv",
+        "url": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/Tornado_All_2010_2024_Australia.csv",
         "format": { "type": "csv" }
       },
+      "transform": [
+        { "filter": "indexof(selectedRatings, datum.TOR_F_SCALE) >= 0" }
+      ],
       "mark": { "type": "point", "filled": true, "size": 30, "tooltip": true },
       "encoding": {
-        "longitude": { "field": "BEGIN_LON", "type": "quantitative" },
-        "latitude": { "field": "BEGIN_LAT", "type": "quantitative" },
-        "color": { "value": "#999999" }
-      }
-    },
-    {
-      "data": {
-        "url": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/Tornado_F1_2010_2024_America.csv",
-        "format": { "type": "csv" }
-      },
-      "mark": { "type": "point", "filled": true, "size": 30, "tooltip": true },
-      "encoding": {
-        "longitude": { "field": "BEGIN_LON", "type": "quantitative" },
-        "latitude": { "field": "BEGIN_LAT", "type": "quantitative" },
-        "color": { "value": "#E69F00" }
-      }
-    },
-    {
-      "data": {
-        "url": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/Tornado_F2_2010_2024_America.csv",
-        "format": { "type": "csv" }
-      },
-      "mark": { "type": "point", "filled": true, "size": 30, "tooltip": true },
-      "encoding": {
-        "longitude": { "field": "BEGIN_LON", "type": "quantitative" },
-        "latitude": { "field": "BEGIN_LAT", "type": "quantitative" },
-        "color": { "value": "#56B4E9" }
-      }
-    },
-    {
-      "data": {
-        "url": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/Tornado_F3_2010_2024_America.csv",
-        "format": { "type": "csv" }
-      },
-      "mark": { "type": "point", "filled": true, "size": 30, "tooltip": true },
-      "encoding": {
-        "longitude": { "field": "BEGIN_LON", "type": "quantitative" },
-        "latitude": { "field": "BEGIN_LAT", "type": "quantitative" },
-        "color": { "value": "#009E73" }
-      }
-    },
-    {
-      "data": {
-        "url": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/Tornado_F4_2010_2024_America.csv",
-        "format": { "type": "csv" }
-      },
-      "mark": { "type": "point", "filled": true, "size": 30, "tooltip": true },
-      "encoding": {
-        "longitude": { "field": "BEGIN_LON", "type": "quantitative" },
-        "latitude": { "field": "BEGIN_LAT", "type": "quantitative" },
-        "color": { "value": "#F0E442" }
-      }
-    },
-    {
-      "data": {
-        "url": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/Tornado_F5_2010_2024_America.csv",
-        "format": { "type": "csv" }
-      },
-      "mark": { "type": "point", "filled": true, "size": 30, "tooltip": true },
-      "encoding": {
-        "longitude": { "field": "BEGIN_LON", "type": "quantitative" },
-        "latitude": { "field": "BEGIN_LAT", "type": "quantitative" },
-        "color": { "value": "#984ea3" }
+        "longitude": { "field": "Longitude", "type": "quantitative" },
+        "latitude": { "field": "Latitude", "type": "quantitative" },
+        "color": {
+          "field": "TOR_F_SCALE",
+          "type": "nominal",
+          "scale": {
+            "domain": ["F0","F1","F2","F3","F4","F5"],
+            "range": ["#999999","#E69F00","#56B4E9","#009E73","#F0E442","#984ea3"]
+          },
+          "legend": { "title": "Fujita rating" }
+        }
       }
     }
   ],
