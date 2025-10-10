@@ -39,8 +39,8 @@
     .vg-tooltip {
       font-family: Helvetica, Arial, sans-serif;
       font-size: 13px;
-      color: #000; /* black text */
-      background: #fff; /* white background */
+      color: #000;
+      background: #fff;
       border: 1px solid #ccc;
       border-radius: 6px;
       padding: 10px 12px;
@@ -49,7 +49,7 @@
       pointer-events: none;
       z-index: 9999;
     }
-
+    
     /* Table layout */
     .vg-tooltip table {
       border-collapse: collapse;
@@ -57,29 +57,18 @@
       width: auto;
     }
     
-    .vg-tooltip th {
-      text-align: left;
-      font-weight: bold;
-      font-size: 13px;
-      color: #000;
-      padding-right: 8px;
-    }
-    
-    .vg-tooltip td {
-      color: #000;
-      font-size: 13px;
-      font-weight: normal;
-    }
-    
-    /* Optional: if Vega uses .key and .val classes */
+    /* Label/title cell — make it grey and normal weight */
+    .vg-tooltip th,
     .vg-tooltip .key {
-      color: #000;
-      font-weight: bold;
+      color: #666 !important;
+      font-weight: normal !important;
     }
     
+    /* Value cell — make it bold and black */
+    .vg-tooltip td,
     .vg-tooltip .val {
-      color: #000;
-      font-weight: normal;
+      color: #000 !important;
+      font-weight: bold !important;
     }
     
     #top-chart {
