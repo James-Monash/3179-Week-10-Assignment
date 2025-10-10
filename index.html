@@ -291,11 +291,7 @@
     async function embedTopSpec() {
       const resp = await fetch(topSpecUrl);
       const spec = await resp.json();
-      const result = await vegaEmbed("#top-chart", spec, { actions: false, renderer: "svg" });
-
-      // use tooltip package
-      const handler = new vegaTooltip.Handler();
-      result.view.tooltip(handler.call); 
+      await vegaEmbed("#top-chart", spec, { actions: false, renderer: "svg" });
     }
 
     // Build and embed the two maps based on selectedRatings. We dynamically create the vega lite script to only show the relevant dots.
