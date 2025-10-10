@@ -291,7 +291,7 @@
     async function embedTopSpec() {
       const resp = await fetch(topSpecUrl);
       const spec = await resp.json();
-      await vegaEmbed("#top-chart", spec, { actions: false, renderer: "svg" });
+      await vegaEmbed("#top-chart", spec, { actions: false, renderer: "canvas" });
     }
 
     // Build and embed the two maps based on selectedRatings. We dynamically create the vega lite script to only show the relevant dots.
