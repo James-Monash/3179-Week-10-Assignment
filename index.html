@@ -134,7 +134,8 @@
 </head>
 <body>
 
-  <h1>Fujita Tornadoes — Australia & United States (2010–2024)</h1>
+  <h1>Tornadoes</h1>
+  <h2>From the United States to Australia</h2>
 
   <div id="top-chart"></div>
 
@@ -151,10 +152,9 @@
     </div>
   </div>
 
-  <footer>Toggle ratings to show/hide them on both maps</footer>
+  <p1>Toggle ratings to show/hide them on both maps</p1>
 
   <script>
-    // CONFIG (same as your earlier file)
     const topSpecUrl = "fastest_australian_tornadoes.json";
 
     const ausCsvPattern = "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/Tornado_F{R}_2010_2024_Australia.csv";
@@ -189,7 +189,7 @@
     let ausEmbed = null;
     let usEmbed = null;
 
-    // Basic CSV fetch parser (simple)
+    // Basic CSV fetch parser
     async function fetchCsv(url) {
       const r = await fetch(url);
       if (!r.ok) return [];
@@ -209,7 +209,7 @@
       return rows;
     }
 
-    // Build legend + checkbox UI
+    // Legend + checkbox UI
     function buildCombinedLegend() {
       const container = document.getElementById("legend-checkboxes");
       container.innerHTML = "";
@@ -265,15 +265,9 @@
 
     // embed top spec as before
     async function embedTopSpec(){
-      try {
-        const resp = await fetch(topSpecUrl);
-        if (!resp.ok) throw new Error("Failed to fetch top spec: " + resp.status);
-        const spec = await resp.json();
-        vegaEmbed("#top-chart", spec, {actions:false, renderer: "canvas"});
-      } catch (err) {
-        document.getElementById("top-chart").innerText = "Unable to load top spec: " + err.message;
-        console.error(err);
-      }
+      const resp = await fetch(topSpecUrl);
+      const spec = await resp.json();
+      vegaEmbed("#top-chart", spec, {actions:false, renderer: "canvas"});
     }
 
     // Build and embed the two maps based on selectedRatings (same logic as before)
@@ -361,9 +355,6 @@
 
       document.getElementById("aus-chart").innerHTML = "";
       document.getElementById("us-chart").innerHTML = "";
-
-      try { ausEmbed = await vegaEmbed("#aus-chart", ausSpec, embedOpts); } catch (err) { console.error(err); document.getElementById("aus-chart").innerText = "Error rendering Australia chart"; }
-      try { usEmbed  = await vegaEmbed("#us-chart", usSpec, embedOpts); } catch (err) { console.error(err); document.getElementById("us-chart").innerText = "Error rendering US chart"; }
     }
 
     // init
