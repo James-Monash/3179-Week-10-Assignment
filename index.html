@@ -17,11 +17,8 @@
       color: #222;
     }
 
-    h1 {
-      text-align: center;
-      margin: 12px 0 18px 0;
-      font-size: 26px;
-    }
+    h1 { font-size: 1.8rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.05rem; font-weight: 400; color: #6b6b6b; text-align: center; margin: 0 0 1rem; }
 
     #top-chart {
       max-width: 800px;
@@ -46,13 +43,22 @@
     }
 
     .chart-card {
-      width: 48%;
-      min-width: 320px;
+      display: flex;
+      align-items: center;     
+      justify-content: center;   
+      background: #f0f0f0;       
+      padding: 12px;
       box-sizing: border-box;
-      padding: 8px;
-      background: #f8f8f8;
-      border-radius: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      min-height: 320px;        
+    }
+    
+    /* make sure embedded vega/canvas fills the available area but remains centred */
+    .chart-card > svg,
+    .chart-card > canvas,
+    .chart-card > div {       
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
     }
 
     /* Combined legend + checkboxes */
@@ -70,6 +76,12 @@
       font-weight: 600;
       margin-right: 6px;
       font-size: 15px;
+    }
+
+    .hint {
+      text-align: center;
+      color: #666;
+      margin-top: 0.75rem;
     }
 
     .legend-checkboxes {
@@ -152,7 +164,7 @@
     </div>
   </div>
 
-  <p1>Toggle ratings to show/hide them on both maps</p1>
+  <p class="hint">Toggle ratings to show/hide them on both maps</p>
 
   <script>
     const topSpecUrl = "fastest_australian_tornadoes.json";
@@ -266,11 +278,11 @@
       vegaEmbed("#top-chart", spec, {actions:false, renderer: "canvas"});
     }
 
-    // Build and embed the two maps based on selectedRatings (same logic as before)
+    // Build and embed the two maps based on selectedRatings. We dynamically create the vega lite script to only show the relevant dots.
     async function renderMaps() {
       // build base layers for Australia
       const ausLayers = [{
-        data: { url: ausBaseTopo, format: { type: "topojson", feature: "ne_50m_admin_1_states_provinces" } },
+        data: { url: ausBaseTopo, format: { type: "topojson", feature: "australia.json" } },
         mark: { type: "geoshape", fill: "#e0e0e0", stroke: "white", strokeWidth: 1 }
       },{
         data: { url: ausGraticules, format: { type: "topojson", feature: "ne_50m_graticules_10" } },
@@ -327,38 +339,33 @@
           }
         });
 
-        const embedOpts = { actions: false, renderer: "canvas" };
+        // build specs
+        const ausSpec = {
+          $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+          width: 800, height: 600, background: "#c6dbef",
+          projection: { type: "mercator", center: [134, -25], scale: 700 },
+          title: { text: "Australian Tornadoes (2010–2024)", anchor: "start", fontSize: 20, font: "Helvetica", color: "#333", subtitle: "Color-coded by Fujita rating" },
+          layer: ausLayers,
+          config: { legend: { labelFontSize: 12, titleFontSize: 14 }, view: { stroke: "transparent" } }
+        };
+  
+        const usSpec = {
+          $schema: "https://vega.github.io/schema/vega-lite/v6.json",
+          width: 800, height: 600, background: "#c6dbef",
+          projection: { type: "mercator", center: [-98, 38], scale: 700 },
+          title: { text: "U.S. Tornadoes (2010–2024)", anchor: "start", fontSize: 20, font: "Helvetica", color: "#333", subtitle: "Color-coded by Fujita rating" },
+          layer: usLayers,
+          config: { legend: { labelFontSize: 12, titleFontSize: 14 }, view: { stroke: "transparent" } }
+        };
 
+        const embedOpts = { actions: false, renderer: "canvas" };
+        
         document.getElementById("aus-chart").innerHTML = "";
         document.getElementById("us-chart").innerHTML = "";
         
-        const resultAus = await vegaEmbed("#aus-chart", ausSpec, embedOpts);
-        const resultUs = await vegaEmbed("#us-chart", usSpec, embedOpts);
+        ausEmbed = await vegaEmbed("#aus-chart", ausSpec, embedOpts);
+        usEmbed  = await vegaEmbed("#us-chart", usSpec,  embedOpts);
       }
-
-      // build specs
-      const ausSpec = {
-        $schema: "https://vega.github.io/schema/vega-lite/v6.json",
-        width: 800, height: 600, background: "#c6dbef",
-        projection: { type: "mercator", center: [134, -25], scale: 700 },
-        title: { text: "Australian Tornadoes (2010–2024)", anchor: "start", fontSize: 20, font: "Helvetica", color: "#333", subtitle: "Color-coded by Fujita rating" },
-        layer: ausLayers,
-        config: { legend: { labelFontSize: 12, titleFontSize: 14 }, view: { stroke: "transparent" } }
-      };
-
-      const usSpec = {
-        $schema: "https://vega.github.io/schema/vega-lite/v6.json",
-        width: 800, height: 600, background: "#c6dbef",
-        projection: { type: "mercator", center: [-98, 38], scale: 700 },
-        title: { text: "U.S. Tornadoes (2010–2024)", anchor: "start", fontSize: 20, font: "Helvetica", color: "#333", subtitle: "Color-coded by Fujita rating" },
-        layer: usLayers,
-        config: { legend: { labelFontSize: 12, titleFontSize: 14 }, view: { stroke: "transparent" } }
-      };
-
-      const embedOpts = { actions: false, renderer: "canvas" };
-
-      document.getElementById("aus-chart").innerHTML = "";
-      document.getElementById("us-chart").innerHTML = "";
     }
 
     // init
