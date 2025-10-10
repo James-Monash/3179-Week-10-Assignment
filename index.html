@@ -185,10 +185,6 @@
     // selected set (initially all)
     let selectedRatings = new Set(ratings);
 
-    // embed handles
-    let ausEmbed = null;
-    let usEmbed = null;
-
     // Basic CSV fetch parser
     async function fetchCsv(url) {
       const r = await fetch(url);
