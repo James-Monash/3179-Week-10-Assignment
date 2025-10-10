@@ -37,30 +37,49 @@
     }
 
     .vg-tooltip {
-      background: rgba(30, 34, 40, 0.96);
-      color: #fefefe;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      color: #000; /* black text */
+      background: #fff; /* white background */
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      line-height: 1.4;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Table layout */
+    .vg-tooltip table {
+      border-collapse: collapse;
+      margin: 0;
+      width: auto;
     }
     
-    /* Table-based tooltip layout */
     .vg-tooltip th {
-      color: #ffd700; /* golden label */
+      text-align: left;
+      font-weight: bold;
+      font-size: 13px;
+      color: #000;
+      padding-right: 8px;
     }
     
     .vg-tooltip td {
-      color: #fefefe !important; /* bright value */
-      font-weight: 500;
+      color: #000;
+      font-size: 13px;
+      font-weight: normal;
     }
     
-    /* If Vega uses .val class for values */
-    .vg-tooltip .val {
-      color: #00e6e6 !important; /* cyan value */
-      font-weight: 600;
-    }
-    
-    /* If Vega uses .key class for labels */
+    /* Optional: if Vega uses .key and .val classes */
     .vg-tooltip .key {
-      color: #ffd700 !important;
-      font-weight: 600;
+      color: #000;
+      font-weight: bold;
+    }
+    
+    .vg-tooltip .val {
+      color: #000;
+      font-weight: normal;
     }
     
     #top-chart {
