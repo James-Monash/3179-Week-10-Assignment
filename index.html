@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@6"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
-  /*<script src="https://cdn.jsdelivr.net/npm/vega-tooltip"></script> // We add this to style the tooltips */
+  <script src="https://cdn.jsdelivr.net/npm/vega-tooltip"></script> // We add this to style the tooltips */
 
   <style>
     body {
@@ -289,10 +289,17 @@
     }
 
     // embed top spec
-    async function embedTopSpec(){
+    async function embedTopSpec() {
       const resp = await fetch(topSpecUrl);
       const spec = await resp.json();
-      const result = await vegaEmbed("#top-chart", spec, {actions:false, renderer: "canvas"});
+      const result = await vegaEmbed("#top-chart", spec, { actions: false, renderer: "canvas" });
+    
+      // Attach tooltip plugin with custom options
+      vegaTooltip.vega(result.view, {
+        theme: 'light',
+        showAllFields: false,
+        fields: ['MaxSpeedFmt', 'FormattedDate']
+      });
     }
 
     // Build and embed the two maps based on selectedRatings. We dynamically create the vega lite script to only show the relevant dots.
