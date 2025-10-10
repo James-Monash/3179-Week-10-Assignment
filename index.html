@@ -39,7 +39,6 @@
     .vg-tooltip {
       font-family: Helvetica, Arial, sans-serif;
       font-size: 13px;
-      color: #000;
       background: #fff;
       border: 1px solid #ccc;
       border-radius: 6px;
@@ -50,27 +49,25 @@
       z-index: 9999;
     }
     
-    /* Table layout */
+    /* Tooltip table layout */
     .vg-tooltip table {
       border-collapse: collapse;
       margin: 0;
       width: auto;
     }
     
-    /* Label/title cell — make it grey and normal weight */
-    .vg-tooltip th,
+    /* Label cell — make it bold and black */
     .vg-tooltip .key {
-      color: #666 !important;
       font-weight: bold !important;
-    }
-    
-    /* Value cell — make it bold and black */
-    .vg-tooltip td,
-    .vg-tooltip .val {
       color: #000 !important;
-      font-weight: normal !important;
     }
     
+    /* Value cell — make it grey and normal weight */
+    .vg-tooltip .value {
+      font-weight: normal !important;
+      color: #666 !important;
+    }
+
     #top-chart {
       max-width: 800px;
       width: 100%;
