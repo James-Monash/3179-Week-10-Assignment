@@ -51,6 +51,13 @@
       z-index: 9999;
     }
         
+    /* The default tooltip content is rendered as a small table */
+    .vg-tooltip table {
+      border-collapse: collapse;
+      margin: 0;
+      width: auto;
+    }
+    
     /* header/title cell */
     .vg-tooltip th {
       text-align: left;
@@ -68,7 +75,20 @@
       font-size: 13px;
       vertical-align: middle;
     }
-
+    
+    /* small key label within table row */
+    .vg-tooltip .key {
+      opacity: 0.85;
+      color: #cbd5e0;
+    }
+    
+    /* value column */
+    .vg-tooltip .val {
+      padding-left: 8px;
+      font-weight: 600;
+      color: #fff;
+    }
+    
     /* make sure newline in an explicit text field respects wrapping */
     .vg-tooltip td pre {
       white-space: pre-wrap;
@@ -76,7 +96,6 @@
       font-family: inherit;
       color: inherit;
     }
-
     #top-chart {
       max-width: 800px;
       width: 100%;
