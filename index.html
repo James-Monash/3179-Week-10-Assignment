@@ -295,7 +295,7 @@
       const result = await vegaEmbed("#top-chart", spec, { actions: false, renderer: "canvas" });
     
       // Attach tooltip plugin with custom options
-      vegaTooltip.vega(result.view, {
+      vega.tooltip(result.view, {
         theme: 'light',
         showAllFields: false,
         fields: ['MaxSpeedFmt', 'FormattedDate']
