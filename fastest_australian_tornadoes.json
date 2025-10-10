@@ -103,6 +103,86 @@
           {"title": "Max wind speed", "field": "MaxSpeedFmt", "type": "nominal"}
         ]
       }
+    },
+    {
+      "data": {
+        "values": [
+          { "lon": 118, "lat": -24, "text": "Fastest tornadoes in WA\noccurred in the 21st century" },
+          { "lon": 122, "lat": -26, "lon_to": 118, "lat_to": -24 }
+        ]
+      },
+      "transform": [
+        { "filter": "datum.text !== undefined" }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "fontSize": 12,
+        "fontWeight": 500,
+        "dx": 6,
+        "dy": 0,
+        "color": "#222",
+        "lineBreak": true
+      },
+      "encoding": {
+        "longitude": { "field": "lon", "type": "quantitative" },
+        "latitude": { "field": "lat", "type": "quantitative" },
+        "text": { "field": "text", "type": "nominal" }
+      }
+    },
+    {
+      "data": {
+        "values": [
+          { "lon": 154.2, "lat": -26.5, "text": "NSW and QLD\nwitness the most tornadoes" },
+          { "lon": 151, "lat": -28, "lon_to": 154.2, "lat_to": -26.5 }
+        ]
+      },
+      "transform": [
+        { "filter": "datum.text !== undefined" }
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "fontSize": 12,
+        "fontWeight": 500,
+        "dx": 6,
+        "dy": 0,
+        "color": "#222",
+        "lineBreak": true
+      },
+      "encoding": {
+        "longitude": { "field": "lon", "type": "quantitative" },
+        "latitude": { "field": "lat", "type": "quantitative" },
+        "text": { "field": "text", "type": "nominal" }
+      }
+    },
+    {
+      "data": {
+        "values": [
+          { "lon": 122, "lat": -26 },
+          { "lon": 118, "lat": -24 }
+        ]
+      },
+      "mark": { "type": "line", "stroke": "#333", "strokeWidth": 1, "opacity": 0.8 },
+      "encoding": {
+        "longitude": { "field": "lon", "type": "quantitative" },
+        "latitude": { "field": "lat", "type": "quantitative" }
+      }
+    },
+    {
+      "data": {
+        "values": [
+          { "lon": 151, "lat": -28 },
+          { "lon": 154.2, "lat": -26.5 }
+        ]
+      },
+      "mark": { "type": "line", "stroke": "#333", "strokeWidth": 1, "opacity": 0.8 },
+      "encoding": {
+        "longitude": { "field": "lon", "type": "quantitative" },
+        "latitude": { "field": "lat", "type": "quantitative" }
+      }
     }
   ],
   "config": {
