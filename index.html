@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Fujita Tornado Visualisations</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@6"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-tooltip"></script> // We add this to style the tooltips
@@ -293,13 +293,6 @@
       const resp = await fetch(topSpecUrl);
       const spec = await resp.json();
       const result = await vegaEmbed("#top-chart", spec, {actions:false, renderer: "canvas"});
-      vegaTooltip.vega(result.view); // attaches tooltip to the view
-
-      vegaTooltip.vega(result.view, {
-        theme: 'light',
-        showAllFields: false,
-        fields: ['MaxSpeedFmt', 'FormattedDate']
-      });
     }
 
     // Build and embed the two maps based on selectedRatings. We dynamically create the vega lite script to only show the relevant dots.
