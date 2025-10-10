@@ -22,7 +22,7 @@
         "url": "https://raw.githubusercontent.com/James-Monash/3179-Week-10-Assignment/main/australia.json",
         "format": {
           "type": "topojson",
-          "feature": "ne_50m_admin_1_states_provinces"
+          "feature": "australia.json"
         }
       },
       "mark": {
