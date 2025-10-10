@@ -263,7 +263,7 @@
       renderMaps();
     }
 
-    // embed top spec as before
+    // embed top spec
     async function embedTopSpec(){
       const resp = await fetch(topSpecUrl);
       const spec = await resp.json();
@@ -330,6 +330,14 @@
             color: { value: ratingColors[r] }
           }
         });
+
+        const embedOpts = { actions: false, renderer: "canvas" };
+
+        document.getElementById("aus-chart").innerHTML = "";
+        document.getElementById("us-chart").innerHTML = "";
+        
+        const resultAus = await vegaEmbed("#aus-chart", ausSpec, embedOpts);
+        const resultUs = await vegaEmbed("#us-chart", usSpec, embedOpts);
       }
 
       // build specs
